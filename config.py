@@ -23,3 +23,5 @@ intents.members = True
 LOG_MCSTATUS = False
 COOLDOWN_SECONDS = 300
 CHECK_INTERVAL = 60
+
+LOG_FILE = True
