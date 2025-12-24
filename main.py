@@ -1,55 +1,12 @@
 import asyncio
-import signal
 import discord
-import os
 import config
 import time
-from bot_instance import bot
+import bot_instance
 from utils.env_helper import insert_env, remove_env_key
-from utils.core_helper import restart, error, success, log
-from discord.ext import commands
-from discord import app_commands
+from utils.core_helper import restart, error, log
 
 START_TIME: float | None = None
-
-@bot.event
-async def on_ready():
-    await init()
-    guild_obj = discord.Object(id=int(config.GUILD_ID))
-    bot.tree.copy_global_to(guild=guild_obj)
-    await bot.tree.sync(guild=guild_obj)
-    elapsed = time.monotonic() - START_TIME
-    success(f"Cordmin started ({elapsed:.2f}s!)")
-
-async def init():
-    while True:
-        try:
-            guild = bot.get_guild(config.GUILD_ID)
-            if guild is None:
-                guild = await bot.fetch_guild(config.GUILD_ID)
-
-            member = guild.get_member(bot.user.id)
-            if member is None:
-                member = await guild.fetch_member(bot.user.id)
-
-            await member.edit(nick="Cordmin")
-            return guild
-
-        except discord.NotFound:
-            remove_env_key("GUILD_ID")
-            retry = await restart(f"Unknown Guild {config.GUILD_ID}")
-            if retry:
-                key = insert_env("GUILD_ID", label="Guild ID")
-                config.GUILD_ID = key
-                continue
-            else:
-                await bot.close()
-                return None
-
-        except Exception as e:
-            error("Failed to connect to guild", e)
-            await bot.close()
-            return None
 
 def validate_config():
     if not config.BOT_TOKEN:
@@ -70,19 +27,24 @@ async def main():
         log(f"Cordmin {config.VERSION} initialising")
         START_TIME = time.monotonic()
         validate_config()
+        bot = bot_instance.CordminBot() 
+        bot.start_time = time.monotonic()
         try:
             await bot.start(config.BOT_TOKEN)
-            break
+            return
         except (discord.LoginFailure, TypeError):
             remove_env_key("BOT_TOKEN")
+            config.BOT_TOKEN = None
             if await restart("Invalid Bot Token"):
                 continue
+            else:
+                break
         except Exception as e:
             error("Failed to initialise bot", e)
+            break
         finally:
             if not bot.is_closed():
                 await bot.close()
-            log("Cordmin stopped")
-            break
+    log("Cordmin stopped")
 
 asyncio.run(main())
