@@ -28,12 +28,14 @@ jobs:
 
       - name: Build binary (Windows)
         run: |
-          pyinstaller main.py `
-            --onefile `
-            --name Cordmin `
-            --collect-submodules command `
-            --collect-submodules listener `
-            --collect-submodules utils
+          pyinstaller main.py ^
+            --onefile ^
+            --name Cordmin ^
+            --hidden-import command.general ^
+            --hidden-import command.admin ^
+            --hidden-import listener.voice ^
+            --hidden-import listener.reaction ^
+            --hidden-import utils.server_helper
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -64,9 +66,11 @@ jobs:
           pyinstaller main.py \
             --onefile \
             --name Cordmin \
-            --collect-submodules command \
-            --collect-submodules listener \
-            --collect-submodules utils
+            --hidden-import command.general \
+            --hidden-import command.admin \
+            --hidden-import listener.voice \
+            --hidden-import listener.reaction \
+            --hidden-import utils.server_helper
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -97,9 +101,11 @@ jobs:
           pyinstaller main.py \
             --onefile \
             --name Cordmin \
-            --collect-submodules command \
-            --collect-submodules listener \
-            --collect-submodules utils
+            --hidden-import command.general \
+            --hidden-import command.admin \
+            --hidden-import listener.voice \
+            --hidden-import listener.reaction \
+            --hidden-import utils.server_helper
 
       - name: Codesign (optional)
         run: |
