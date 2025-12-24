@@ -33,7 +33,10 @@ class CordminBot(commands.Bot):
         guild_obj = discord.Object(id=int(config.GUILD_ID))
         self.tree.copy_global_to(guild=guild_obj)
         await self.tree.sync(guild=guild_obj)
-        elapsed = time.monotonic() - self.START_TIME
+        if self.start_time is not None:
+            elapsed = time.monotonic() - self.start_time
+        else:
+            elapsed = 0
         success(f"Cordmin started ({elapsed:.2f}s!)")
 
     async def init(self):
