@@ -53,8 +53,9 @@ jobs:
           name: Release ${{ github.ref_name }} (Windows)
           artifacts: dist/Cordmin.exe
           generateReleaseNotes: false
+          replacesArtifacts: true
+          skipIfReleaseExists: false
           token: ${{ secrets.GITHUB_TOKEN }}
-          update: true
           
   build-linux:
     name: Build Linux
@@ -97,8 +98,9 @@ jobs:
           name: Release ${{ github.ref_name }} (Linux)
           artifacts: dist/Cordmin
           generateReleaseNotes: false
+          replacesArtifacts: true
+          skipIfReleaseExists: false
           token: ${{ secrets.GITHUB_TOKEN }}
-          update: true
           
   build-macos:
     name: Build macOS
@@ -145,5 +147,6 @@ jobs:
           name: Release ${{ github.ref_name }} (macOS)
           artifacts: dist/Cordmin
           generateReleaseNotes: false
+          replacesArtifacts: true
+          skipIfReleaseExists: false
           token: ${{ secrets.GITHUB_TOKEN }}
-          update: true
