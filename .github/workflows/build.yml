@@ -45,18 +45,6 @@ jobs:
         with:
           name: Cordmin-Windows
           path: dist/Cordmin.exe
-
-      - name: Create or update GitHub Release (Windows)
-        uses: ncipollo/release-action@v1
-        with:
-          tag: ${{ github.ref_name }}
-          name: Release ${{ github.ref_name }} (Windows)
-          artifacts: dist/Cordmin.exe
-          generateReleaseNotes: false
-          replacesArtifacts: true
-          skipIfReleaseExists: false
-          allowUpdates: true
-          token: ${{ secrets.GITHUB_TOKEN }}
           
   build-linux:
     name: Build Linux
@@ -91,18 +79,6 @@ jobs:
         with:
           name: Cordmin-Linux
           path: dist/Cordmin
-
-      - name: Create or update GitHub Release (Linux)
-        uses: ncipollo/release-action@v1
-        with:
-          tag: ${{ github.ref_name }}
-          name: Release ${{ github.ref_name }} (Linux)
-          artifacts: dist/Cordmin
-          generateReleaseNotes: false
-          replacesArtifacts: true
-          skipIfReleaseExists: false
-          allowUpdates: true
-          token: ${{ secrets.GITHUB_TOKEN }}
           
   build-macos:
     name: Build macOS
@@ -141,15 +117,41 @@ jobs:
         with:
           name: Cordmin-macOS
           path: dist/Cordmin
+          
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [build-windows, build-linux, build-macos]
 
-      - name: Create or update GitHub Release (macOS)
+    steps:
+      - name: Download Windows artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: Cordmin-Windows
+          path: artifacts/
+
+      - name: Download Linux artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: Cordmin-Linux
+          path: artifacts/
+
+      - name: Download macOS artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: Cordmin-macOS
+          path: artifacts/
+
+      - name: Create or update GitHub Release
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ github.ref_name }}
-          name: Release ${{ github.ref_name }} (macOS)
-          artifacts: dist/Cordmin
+          name: Release ${{ github.ref_name }}
+          artifacts: |
+            artifacts/Cordmin-Windows/Cordmin.exe
+            artifacts/Cordmin-Linux/Cordmin
+            artifacts/Cordmin-macOS/Cordmin
           generateReleaseNotes: false
           replacesArtifacts: true
-          skipIfReleaseExists: false
           allowUpdates: true
           token: ${{ secrets.GITHUB_TOKEN }}
