@@ -6,6 +6,9 @@ on:
       - "v*"
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build-windows:
     name: Build Windows
@@ -43,7 +46,17 @@ jobs:
           name: Cordmin-Windows
           path: dist/Cordmin.exe
 
-
+      - name: Create or update GitHub Release (Windows)
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }} (Windows)
+          artifacts: dist/Cordmin.exe
+          generateReleaseNotes: false
+          replacesArtifacts: true
+          skipIfReleaseExists: false
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
   build-linux:
     name: Build Linux
     runs-on: ubuntu-latest
@@ -78,7 +91,17 @@ jobs:
           name: Cordmin-Linux
           path: dist/Cordmin
 
-
+      - name: Create or update GitHub Release (Linux)
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }} (Linux)
+          artifacts: dist/Cordmin
+          generateReleaseNotes: false
+          replacesArtifacts: true
+          skipIfReleaseExists: false
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
   build-macos:
     name: Build macOS
     runs-on: macos-latest
@@ -116,3 +139,14 @@ jobs:
         with:
           name: Cordmin-macOS
           path: dist/Cordmin
+
+      - name: Create or update GitHub Release (macOS)
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }} (macOS)
+          artifacts: dist/Cordmin
+          generateReleaseNotes: false
+          replacesArtifacts: true
+          skipIfReleaseExists: false
+          token: ${{ secrets.GITHUB_TOKEN }}
