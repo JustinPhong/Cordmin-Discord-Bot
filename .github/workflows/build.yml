@@ -122,32 +122,38 @@ jobs:
     name: Create GitHub Release
     runs-on: ubuntu-latest
     needs: [build-windows, build-linux, build-macos]
-
+  
     steps:
+      - name: Create artifacts folder
+        run: mkdir -p artifacts/windows artifacts/linux artifacts/macos
+  
       - name: Download Windows artifact
         uses: actions/download-artifact@v4
         with:
           name: Cordmin-Windows
-          path: artifacts/
-
+          path: artifacts/windows
+  
       - name: Download Linux artifact
         uses: actions/download-artifact@v4
         with:
           name: Cordmin-Linux
-          path: artifacts/
-
+          path: artifacts/linux
+  
       - name: Download macOS artifact
         uses: actions/download-artifact@v4
         with:
           name: Cordmin-macOS
-          path: artifacts/
-
+          path: artifacts/macos
+  
       - name: Create or update GitHub Release
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
-          artifacts: artifacts/Cordmin-Windows/Cordmin.exe,artifacts/Cordmin-Linux/Cordmin,artifacts/Cordmin-macOS/Cordmin
+          artifacts: |
+            artifacts/windows/Cordmin.exe,
+            artifacts/linux/Cordmin,
+            artifacts/macos/Cordmin
           generateReleaseNotes: false
           replacesArtifacts: true
           allowUpdates: true
