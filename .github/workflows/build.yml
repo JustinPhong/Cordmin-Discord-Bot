@@ -147,10 +147,7 @@ jobs:
         with:
           tag: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
-          artifacts: |
-            artifacts/Cordmin-Windows/Cordmin.exe
-            artifacts/Cordmin-Linux/Cordmin
-            artifacts/Cordmin-macOS/Cordmin
+          artifacts: artifacts/Cordmin-Windows/Cordmin.exe,artifacts/Cordmin-Linux/Cordmin,artifacts/Cordmin-macOS/Cordmin
           generateReleaseNotes: false
           replacesArtifacts: true
           allowUpdates: true
