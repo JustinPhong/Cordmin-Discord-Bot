@@ -54,7 +54,8 @@ jobs:
           artifacts: dist/Cordmin.exe
           generateReleaseNotes: false
           token: ${{ secrets.GITHUB_TOKEN }}
-
+          update: true
+          
   build-linux:
     name: Build Linux
     runs-on: ubuntu-latest
@@ -97,6 +98,7 @@ jobs:
           artifacts: dist/Cordmin
           generateReleaseNotes: false
           token: ${{ secrets.GITHUB_TOKEN }}
+          update: true
           
   build-macos:
     name: Build macOS
@@ -144,3 +146,4 @@ jobs:
           artifacts: dist/Cordmin
           generateReleaseNotes: false
           token: ${{ secrets.GITHUB_TOKEN }}
+          update: true
