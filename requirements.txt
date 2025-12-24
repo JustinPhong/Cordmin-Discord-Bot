@@ -3,3 +3,4 @@ colorama
 mcstatus
 python-dotenv
 toml
+gamercon-async
