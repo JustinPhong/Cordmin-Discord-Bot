@@ -2,3 +2,4 @@ discord.py
 colorama
 mcstatus
 python-dotenv
+toml
