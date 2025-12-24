@@ -43,6 +43,14 @@ jobs:
           name: Cordmin-Windows
           path: dist/Cordmin.exe
 
+      - name: Create or update GitHub Release (Windows)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }} (Windows)
+          files: dist/Cordmin.exe
+          overwrite: true
 
   build-linux:
     name: Build Linux
@@ -78,6 +86,14 @@ jobs:
           name: Cordmin-Linux
           path: dist/Cordmin
 
+      - name: Create or update GitHub Release (Linux)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }} (Linux)
+          files: dist/Cordmin
+          overwrite: true
 
   build-macos:
     name: Build macOS
@@ -116,3 +132,12 @@ jobs:
         with:
           name: Cordmin-macOS
           path: dist/Cordmin
+
+      - name: Create or update GitHub Release (macOS)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }} (macOS)
+          files: dist/Cordmin
+          overwrite: true
