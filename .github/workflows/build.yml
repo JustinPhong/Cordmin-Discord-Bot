@@ -145,15 +145,30 @@ jobs:
           name: Cordmin-macOS
           path: artifacts/macos
   
+      - name: Zip Windows build
+        run: |
+          cd artifacts/windows
+          zip -r Cordmin-Windows.zip Cordmin.exe
+  
+      - name: Zip Linux build
+        run: |
+          cd artifacts/linux
+          zip -r Cordmin-Linux.zip Cordmin
+  
+      - name: Zip macOS build
+        run: |
+          cd artifacts/macos
+          zip -r Cordmin-macOS.zip Cordmin
+  
       - name: Create or update GitHub Release
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
           artifacts: |
-            artifacts/windows/Cordmin.exe,
-            artifacts/linux/Cordmin,
-            artifacts/macos/Cordmin
+            artifacts/windows/Cordmin-Windows.zip,
+            artifacts/linux/Cordmin-Linux.zip,
+            artifacts/macos/Cordmin-macOS.zip
           generateReleaseNotes: false
           replacesArtifacts: true
           allowUpdates: true
