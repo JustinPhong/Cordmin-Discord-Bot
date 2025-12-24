@@ -21,8 +21,8 @@ class MCStatus(commands.Cog):
         while not self.bot.is_closed():
             data = load_json("servers.json")
 
-            for guild_id, cfg in data.items():
-                await self.check_server(int(guild_id), cfg, data)
+            tasks = [asyncio.create_task(self.check_server(int(guild_id), cfg, data))for guild_id, cfg in data.items()]
+            await asyncio.gather(*tasks, return_exceptions=True)
 
             save_json(data, "servers.json")
             await asyncio.sleep(config.CHECK_INTERVAL)
@@ -84,9 +84,63 @@ def check_mc(ip, port):
         "version": status.version.name
     }
 
+class LogForwarder(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+        self.tasks = {}
+
+    async def cog_load(self):
+        self.bot.loop.create_task(self.start())
+
+    async def start(self):
+        await self.bot.wait_until_ready()
+        data = load_json("servers.json")
+
+        for guild_id, servers in data.items():
+            for cfg in servers:
+                log_channel_id = cfg.get("log_channel")
+                log_dir = cfg.get("latest_log")
+
+                if not log_channel_id or not log_dir:
+                    continue
+
+                log_path = os.path.join(log_dir, "latest.log")
+
+                if not os.path.isfile(log_path):
+                    warning(f"Log file not found: {log_path}")
+                    continue
+
+                key = f"{guild_id}:{log_path}"
+                if key not in self.tasks:
+                    self.tasks[key] = asyncio.create_task(
+                        self.forward_logs(guild_id, log_channel_id, log_path)
+                    )
+
+    async def forward_logs(self, guild_id, log_channel_id, log_path):
+        last_position = 0
+
+        while not self.bot.is_closed():
+            try:
+                with open(log_path, "r", encoding="utf-8", errors="ignore") as f:
+                    f.seek(last_position)
+                    lines = f.readlines()
+                    last_position = f.tell()
+
+                if lines:
+                    channel = self.bot.get_channel(log_channel_id)
+                    if channel:
+                        for line in lines:
+                            await channel.send(line.rstrip())
+
+            except Exception as e:
+                error(f"Log read failed ({guild_id})", e)
+
+            await asyncio.sleep(5)
+
 async def setup(bot: commands.Bot):
     try:
         await bot.add_cog(MCStatus(bot))
+        await bot.add_cog(LogForwarder(bot))
         log("MC status loaded")
     except Exception as e:
         error("Failed to load mc status", e)
