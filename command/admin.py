@@ -302,16 +302,23 @@ class AdminCog(commands.Cog):
             warning("Failed to run", e)
             await interaction.followup.send(f"Failed to run: {e}", ephemeral=True)
 
-    @app_commands.command(name="server_mc_add",description="Start watching a Minecraft server status")
+    @app_commands.command(name="server_mc_add",description="Start watching a Minecraft server status and log to channel")
     @app_commands.default_permissions(administrator=True)
-    @app_commands.describe(ip="Server IP or domain",port="Server port (default 25565)",channel="Channel to send status updates")
-    async def server_mc_add(self,interaction: discord.Interaction,ip: str,channel: discord.TextChannel,port: int = 25565):
+    @app_commands.describe(ip="Server IP or domain",port="Server port (default 25565)",channel="Channel to send status updates",log_channel="Optional log channel",log_file_path="FIle path to Minecraft\\Logs")
+    async def server_mc_add(self,interaction: discord.Interaction,ip: str,channel: discord.TextChannel,port: int = 25565,log_channel: discord.TextChannel | None = None, log_file_path: str | None = None):
         await interaction.response.defer(ephemeral=True)
         data = load_json("servers.json")
         guild_id = str(interaction.guild.id)
-        data[guild_id] = {"ip": ip,"port": port,"channel_id": channel.id,"message_id": None,"last_status": None,"cooldown_until": 0}
+        if guild_id not in data:
+            data[guild_id] = []
+        old_entries = [s for s in data[guild_id] if s["ip"] == ip and s["port"] == port]
+        for entry in old_entries:
+            data[guild_id].remove(entry)
+        server_entry = {"ip": ip,"port": port,"channel_id": channel.id,"log_channel": log_channel.id if log_channel else None,"latest_log": log_file_path if log_file_path else None,"message_id": None,"last_status": None,"cooldown_until": 0}
+        data[guild_id].append(server_entry)
         save_json(data, "servers.json")
         await interaction.followup.send(f"Now watching {ip}:{port}. Updates will be sent to {channel.mention}",ephemeral=True)
+
 
 async def setup(bot: commands.Bot):
     try:
