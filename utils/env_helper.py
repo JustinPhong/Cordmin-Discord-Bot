@@ -1,4 +1,3 @@
-from getpass import getpass
 from pathlib import Path
 
 def insert_env(key: str, label: str | None = None, value: str | None = None) -> str:
@@ -14,7 +13,6 @@ def insert_env(key: str, label: str | None = None, value: str | None = None) -> 
 
 def remove_env_key(key: str):
     if not Path(".env").exists():
-        print("Env not exists")
         return
 
     lines = Path(".env").read_text(encoding="utf-8").splitlines()
