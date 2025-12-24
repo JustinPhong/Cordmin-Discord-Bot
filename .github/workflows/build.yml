@@ -6,6 +6,9 @@ on:
       - "v*"
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build-windows:
     name: Build Windows
@@ -44,13 +47,13 @@ jobs:
           path: dist/Cordmin.exe
 
       - name: Create or update GitHub Release (Windows)
-        if: startsWith(github.ref, 'refs/tags/')
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }} (Windows)
-          files: dist/Cordmin.exe
-          overwrite: true
+          artifacts: dist/Cordmin.exe
+          generateReleaseNotes: false
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   build-linux:
     name: Build Linux
@@ -87,14 +90,14 @@ jobs:
           path: dist/Cordmin
 
       - name: Create or update GitHub Release (Linux)
-        if: startsWith(github.ref, 'refs/tags/')
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }} (Linux)
-          files: dist/Cordmin
-          overwrite: true
-
+          artifacts: dist/Cordmin
+          generateReleaseNotes: false
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
   build-macos:
     name: Build macOS
     runs-on: macos-latest
@@ -134,10 +137,10 @@ jobs:
           path: dist/Cordmin
 
       - name: Create or update GitHub Release (macOS)
-        if: startsWith(github.ref, 'refs/tags/')
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }} (macOS)
-          files: dist/Cordmin
-          overwrite: true
+          artifacts: dist/Cordmin
+          generateReleaseNotes: false
+          token: ${{ secrets.GITHUB_TOKEN }}
