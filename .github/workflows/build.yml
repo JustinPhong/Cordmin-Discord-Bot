@@ -55,6 +55,7 @@ jobs:
           generateReleaseNotes: false
           replacesArtifacts: true
           skipIfReleaseExists: false
+          allowUpdates: true
           token: ${{ secrets.GITHUB_TOKEN }}
           
   build-linux:
@@ -100,6 +101,7 @@ jobs:
           generateReleaseNotes: false
           replacesArtifacts: true
           skipIfReleaseExists: false
+          allowUpdates: true
           token: ${{ secrets.GITHUB_TOKEN }}
           
   build-macos:
@@ -149,4 +151,5 @@ jobs:
           generateReleaseNotes: false
           replacesArtifacts: true
           skipIfReleaseExists: false
+          allowUpdates: true
           token: ${{ secrets.GITHUB_TOKEN }}
