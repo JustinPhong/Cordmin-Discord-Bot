@@ -1,3 +1,7 @@
-/.json
+__pycache__/
+*.py[cod]
 .env
-/.vs
+Logs/
+Config
+.vs/
+*.json
