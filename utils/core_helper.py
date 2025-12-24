@@ -40,7 +40,7 @@ def error(text: str, e: Exception | None = None):
         log(f"{Fore.RED}{text}")
 
 async def restart(error_msg: str) -> bool:
-    answer = await async_input(f"{servertime()} {Fore.YELLOW}{error_msg}{Fore.RESET}, press Y to restart: ",timeout=5)
+    answer = await async_input(f"{servertime()} {Fore.YELLOW}{error_msg}{Fore.RESET}, press Y to restart: \n",timeout=5)
     if answer and answer.strip().lower() == "y":
         log("Restarting...")
         return True
