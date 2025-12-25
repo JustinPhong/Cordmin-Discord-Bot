@@ -37,6 +37,7 @@ def get_remote_version():
 async def main():
     global START_TIME
     try:
+        log("Checking update")
         remote_version, release_url = get_remote_version()
         if remote_version and remote_version != config.VERSION.lower():
             warning(f"New version available: {remote_version} {release_url} (current: {config.VERSION.lower()})")
