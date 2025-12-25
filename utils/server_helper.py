@@ -21,9 +21,12 @@ class MCStatus(commands.Cog):
         while not self.bot.is_closed():
             data = load_json("servers.json")
 
-            tasks = [asyncio.create_task(self.check_server(int(guild_id), cfg, data))for guild_id, cfg in data.items()]
-            await asyncio.gather(*tasks, return_exceptions=True)
+            tasks = []
+            for guild_id, servers in data.items():
+                for cfg in servers:
+                    tasks.append(asyncio.create_task(self.check_server(int(guild_id), cfg, data)))
 
+            await asyncio.gather(*tasks, return_exceptions=True)
             save_json(data, "servers.json")
             await asyncio.sleep(config.CHECK_INTERVAL)
 
@@ -73,7 +76,6 @@ class MCStatus(commands.Cog):
         else:
             msg = await channel.send(content)
             cfg["message_id"] = msg.id
-        data[str(guild_id)] = cfg
 
 def check_mc(ip, port):
     server = JavaServer.lookup(f"{ip}:{port}")
@@ -90,34 +92,59 @@ class LogForwarder(commands.Cog):
         self.tasks = {}
 
     async def cog_load(self):
-        self.bot.loop.create_task(self.start())
+        asyncio.create_task(self.start())
+
 
     async def start(self):
         await self.bot.wait_until_ready()
-        data = load_json("servers.json")
 
-        for guild_id, servers in data.items():
-            for cfg in servers:
-                log_channel_id = cfg.get("log_channel")
-                log_dir = cfg.get("latest_log")
+        while not self.bot.is_closed():
+            data = load_json("servers.json")
 
-                if not log_channel_id or not log_dir:
+            if not isinstance(data, dict):
+                warning("servers.json root is not a dict")
+                await asyncio.sleep(config.CHECK_INTERVAL)
+                continue
+
+            for guild_id, servers in data.items():
+
+                if isinstance(servers, dict):
+                    servers = [servers]
+
+                if not isinstance(servers, list):
+                    warning(f"Invalid server list for guild {guild_id}")
                     continue
 
-                log_path = os.path.join(log_dir, "latest.log")
+                for cfg in servers:
 
-                if not os.path.isfile(log_path):
-                    warning(f"Log file not found: {log_path}")
-                    continue
+                    if not isinstance(cfg, dict):
+                        warning(f"Invalid server entry in guild {guild_id}")
+                        continue
 
-                key = f"{guild_id}:{log_path}"
-                if key not in self.tasks:
-                    self.tasks[key] = asyncio.create_task(
-                        self.forward_logs(guild_id, log_channel_id, log_path)
-                    )
+                    log_channel_id = cfg.get("log_channel")
+                    log_dir = cfg.get("latest_log")
+
+                    if not log_channel_id or not log_dir:
+                        continue
+
+                    log_path = os.path.join(log_dir, "latest.log")
+
+                    if not os.path.isfile(log_path):
+                        warning(f"Log file not found: {log_path}")
+                        continue
+
+                    key = f"{guild_id}:{log_path}"
+                    if key not in self.tasks:
+                        log(f"Starting log forwarder for {key}")
+                        self.tasks[key] = asyncio.create_task(self.forward_logs(guild_id, log_channel_id, log_path))
+
+            await asyncio.sleep(config.CHECK_INTERVAL)
 
     async def forward_logs(self, guild_id, log_channel_id, log_path):
-        last_position = 0
+        try:
+            last_position = os.path.getsize(log_path)
+        except FileNotFoundError:
+            last_position = 0
 
         while not self.bot.is_closed():
             try:
@@ -129,8 +156,8 @@ class LogForwarder(commands.Cog):
                 if lines:
                     channel = self.bot.get_channel(log_channel_id)
                     if channel:
-                        for line in lines:
-                            await channel.send(line.rstrip())
+                        chunk = "".join(lines)[-1900:]
+                        await channel.send(f"```{chunk}```")
 
             except Exception as e:
                 error(f"Log read failed ({guild_id})", e)
